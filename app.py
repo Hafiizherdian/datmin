@@ -6,9 +6,14 @@ import os
 import plotly.express as px
 from preprocessing import data_cleaning, handle_missing, encode_transform, feature_scaling
 
-# Konfigurasi awal dashboard profesional
+
+# =============================================
+# KONFIGURASI DASAR DASHBOARD
+# =============================================
 st.set_page_config(page_title='Dashboard Churn & Cluster', layout='wide')
 
+
+# Header dashboard
 st.markdown("""
 <div style='padding: 1.5rem 0 1rem 0; border-bottom: 1px solid #eee; background: #fff;'>
     <h1 style='font-size:2.2rem; color:#222; margin-bottom:0;'>Telco Churn Prediction System</h1>
@@ -24,6 +29,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# =============================================
+# SIDEBAR
+# =============================================
 with st.sidebar:
     st.image('https://static.streamlit.io/examples/dash-logo.png', width=80)
     st.title('Menu')
@@ -31,30 +39,35 @@ with st.sidebar:
     st.markdown('---')
     st.markdown('<span style="font-size:0.9rem;color:#888;">Dashboard by Kelompok 12</span>', unsafe_allow_html=True)
 
+# =============================================
+# MAIN CONTENT
+# =============================================
 if uploaded_file is not None:
     try:
+        # 1. Baca file csv
         df = pd.read_csv(uploaded_file)
-        # Cek struktur kolom
+        # 2. Cek struktur kolom
         model_cols = joblib.load('scaler.joblib').feature_names_in_
         if not all([col in df.columns for col in model_cols]):
             st.error('Struktur kolom tidak sesuai dengan data training!\nKolom yang dibutuhkan: ' + ', '.join(model_cols))
         else:
-            # Pipeline preprocessing
+            # 3. Pipeline preprocessing
             df_clean = data_cleaning(df)
             df_clean = handle_missing(df_clean)
             df_clean = encode_transform(df_clean)
+            # 4. Feature scaling
             X = df_clean[model_cols]
             scaler = joblib.load('scaler.joblib')
             X_scaled = scaler.transform(X)
-            # Load model
+            # 5. Load model
             logreg = joblib.load('logreg_model.joblib')
             kmeans = joblib.load('kmeans_model.joblib')
-            # Prediksi
+            # 6. Prediksi
             y_pred = logreg.predict(X_scaled)
             cluster = kmeans.predict(X_scaled)
             
 
-            # Tab 1: Data Overview
+            # 7. Tab 1: Data Overview
             tab0, tab1, tab2, tab3, tab4 = st.tabs([
     'Dataset Overview',
     '1️⃣ Data Understanding', 
@@ -62,6 +75,9 @@ if uploaded_file is not None:
     '3️⃣ Modeling & Evaluation', 
     '4️⃣ Export & Insight'])
 
+            # =============================================
+            # TAB 0: DATASET OVERVIEW
+            # =============================================
             with tab0:
                 st.markdown("""
     <div style='background:#f8fafc; border-radius:12px; padding:1.5rem 2rem 1rem 2rem; margin-bottom:1.5rem;'>
@@ -116,6 +132,9 @@ if uploaded_file is not None:
                 fig_clus.update_layout(height=300, margin=dict(l=10, r=10, t=30, b=10), showlegend=False)
                 st.plotly_chart(fig_clus, use_container_width=True, key='plotly_clus')
 
+            # =============================================
+            # TAB 1: DATA UNDERSTANDING
+            # =============================================
             with tab1:
                 st.markdown("""
     <div style='background:#f0f9ff; border-radius:12px; padding:1.2rem 2rem 1rem 2rem; margin-bottom:1.5rem;'>
@@ -145,6 +164,9 @@ if uploaded_file is not None:
                     else:
                         st.info('Tidak ada fitur numerik untuk boxplot.')
 
+            # =============================================
+            # TAB 2: PREPROCESSING
+            # =============================================
             with tab2:
                 st.markdown("""
     <div style='background:#fefce8; border-radius:12px; padding:1.2rem 2rem 1rem 2rem; margin-bottom:1.5rem;'>
@@ -184,6 +206,9 @@ if uploaded_file is not None:
                     except Exception as e:
                         st.info(f'Gagal menampilkan distribusi fitur numerik: {e}')
 
+            # =============================================
+            # TAB 3: MODELING & EVALUATION
+            # =============================================
             with tab3:
                 st.markdown("""
     <div style='background:#f1f5f9; border-radius:12px; padding:1.2rem 2rem 1rem 2rem; margin-bottom:1.5rem;'>
@@ -303,6 +328,9 @@ if uploaded_file is not None:
                                      columns=['Prediksi Tidak Churn', 'Prediksi Churn'],
                                      index=['Asli Tidak Churn', 'Asli Churn']))
 
+            # =============================================
+            # TAB 4: EXPORT & INSIGHT
+            # =============================================
             with tab4:
                 st.header('📤 4️⃣ Export & Insight')
                 st.markdown('Tahap akhir data mining: Ekspor hasil prediksi & insight bisnis.')
