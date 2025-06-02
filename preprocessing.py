@@ -29,7 +29,7 @@ def data_cleaning(df):
     if 'customerID' in df.columns:
         df = df.drop('customerID', axis=1)
     
-    # Konversi 'TotalCharges' ke numerik (jika ada)
+    # Konversi 'TotalCharges' ke numerik
     if 'TotalCharges' in df.columns:
         df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')  # 'coerce' untuk mengubah invalid values jadi NaN
     
@@ -62,7 +62,7 @@ def encode_transform(df):
     Returns:
         DataFrame: Data dengan kolom kategorik ter-encode.
     """
-    # Encode kolom target 'Churn' (jika ada)
+    # Encode kolom target 'Churn' 
     if 'Churn' in df.columns:
         df['Churn'] = df['Churn'].map({'No': 0, 'Yes': 1})  # Manual mapping untuk target
     
